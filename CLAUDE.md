@@ -39,35 +39,51 @@ Everything needed to tear an app apart and understand it:
 ### Half 2: Full-Stack App Development (T3 Turbo Stack)
 Not a generic build system — an opinionated, production-ready app factory built on **create-t3-turbo**:
 
-**The Stack (current as of Feb 2026):**
+**The Stack (current as of Feb 2026, repo last updated Feb 17 2026):**
 
 ```
-Monorepo (Turborepo + pnpm)
+Monorepo (Turborepo v2.5.8+ / pnpm 10.19.0 / Node.js ^22.21.0)
 ├── apps/
-│   ├── expo/          — React Native + Expo SDK 54, RN 0.81, Expo Router, NativeWind v5
-│   └── nextjs/        — Next.js 16, React 19, Tailwind CSS v4 (optional web companion)
+│   ├── expo/              — React Native 0.81.5 + Expo SDK 54, Expo Router 6, NativeWind v5
+│   ├── nextjs/            — Next.js 16.0.9, React 19.1.4, Tailwind CSS v4
+│   └── tanstack-start/    — TanStack Start v1 (rc), Vite 7, Nitro
 ├── packages/
-│   ├── api/           — tRPC v11 router definitions
-│   ├── auth/          — Better Auth (replaced Auth.js/NextAuth — Auth.js is now part of Better Auth)
-│   ├── db/            — Drizzle ORM + Supabase (edge-ready, replaced PlanetScale)
-│   ├── ui/            — shadcn-ui components
-│   ├── validators/    — Zod schemas (shared validation)
-│   ├── eslint/        — shared lint presets
-│   ├── prettier/      — shared formatting
-│   ├── tailwind/      — shared theme/config
-│   └── typescript/    — shared tsconfig
+│   ├── api/               — tRPC v11 routers (auth.ts, post.ts, etc.)
+│   ├── auth/              — Better Auth 1.4.0-beta.9 (Drizzle adapter + Expo plugin + OAuth proxy)
+│   ├── db/                — Drizzle ORM + PostgreSQL on Supabase (snake_case, edge-ready)
+│   ├── ui/                — shadcn-ui components
+│   └── validators/        — Zod schemas (shared validation)
+├── tooling/
+│   ├── eslint/            — @acme/eslint-config
+│   ├── prettier/          — @acme/prettier-config
+│   ├── tailwind/          — @acme/tailwind-config (Tailwind v4)
+│   └── typescript/        — @acme/tsconfig
+└── turbo/generators/      — Turborepo codegen templates
+```
+
+**Scaffolding:**
+```bash
+# New project from template
+npx create-turbo@latest -e https://github.com/t3-oss/create-t3-turbo
+
+# Add a new package to existing monorepo
+pnpm turbo gen init
 ```
 
 **Key tech decisions:**
-- **Better Auth** over NextAuth/Auth.js — native Expo support, no proxy server needed, plugin ecosystem
-- **Drizzle + Supabase** — type-safe DB with edge-ready Postgres
-- **tRPC v11** — end-to-end type-safe API between all apps and packages
-- **React 19** across everything
+- **Better Auth 1.4.0-beta.9** over NextAuth/Auth.js — native Expo support via `@better-auth/expo`, plugin ecosystem, OAuth proxy for preview deploys, Discord as default social provider. Auth schema generated via `pnpm --filter @acme/auth generate`
+- **Drizzle + Supabase** — type-safe Postgres with `drizzle-zod` for schema→validator generation, `drizzle-kit push` for migrations, Drizzle Studio for visual DB management
+- **tRPC v11** with `@trpc/tanstack-react-query` — end-to-end type-safe API
+- **React 19.1.4** across everything
 - **TanStack Query + TanStack Form** — data fetching and form management
-- **NativeWind v5** — Tailwind CSS v4 in React Native
-- **Expo Router** — file-based routing for the mobile app
-- **pnpm workspaces** — monorepo package management
-- **Turborepo** — build orchestration, `pnpm turbo gen init` to scaffold new packages
+- **NativeWind v5** (preview) — Tailwind CSS v4 in React Native
+- **Expo Router 6** — file-based routing, `expo-secure-store` for token persistence
+- **pnpm 10.19.0** with **catalog system** — centralized dependency versioning in `pnpm-workspace.yaml`
+- **Turborepo** — pipeline tasks: build, dev, format, lint, typecheck, clean, push (db), studio, ui-add
+- **TypeScript 5.9.3** across all packages
+- **superjson 2.2.3** — serialization for tRPC
+
+**Env vars needed:** `POSTGRES_URL`, `AUTH_SECRET`, `AUTH_DISCORD_ID`, `AUTH_DISCORD_SECRET`, `AUTH_REDIRECT_PROXY_URL`
 
 **Build/deploy tools:**
 - **Expo CLI / EAS CLI** — local dev builds, cloud production builds
