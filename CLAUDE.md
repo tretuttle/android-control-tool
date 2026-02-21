@@ -72,9 +72,9 @@ pnpm turbo gen init
 
 **Key tech decisions:**
 - **Better Auth 1.4.0-beta.9** over NextAuth/Auth.js — native Expo support via `@better-auth/expo`, plugin ecosystem, OAuth proxy for preview deploys, Discord as default social provider. Auth schema generated via `pnpm --filter @acme/auth generate`
-- **Database — two options depending on the project:**
-  - **Drizzle + Supabase** — type-safe Postgres with `drizzle-zod` for schema→validator generation, `drizzle-kit push` for migrations, Drizzle Studio for visual DB management. Good for traditional relational data, edge-ready workloads.
-  - **Convex** — reactive backend-as-a-service with real-time sync, serverless functions, automatic caching. Use where real-time matters, or where the reactive model is a better fit than traditional request/response.
+- **Database — Convex first, Drizzle+Supabase when needed:**
+  - **Convex (primary)** — reactive backend with real-time sync, serverless functions, automatic caching, built-in auth integrations. Default choice for new projects.
+  - **Drizzle + Supabase (fallback)** — type-safe Postgres with `drizzle-zod` for schema→validator generation, `drizzle-kit push` for migrations, Drizzle Studio for visual DB management. Use when you specifically need raw Postgres, edge workloads, or the project demands traditional relational patterns.
 - **tRPC v11** with `@trpc/tanstack-react-query` — end-to-end type-safe API
 - **React 19.1.4** across everything
 - **TanStack Query + TanStack Form** — data fetching and form management
@@ -170,9 +170,9 @@ Cheese and tomato go on pizza, but also in spaghetti and lasagna. The underlying
 - create-t3-turbo template — project scaffolding
 - Expo CLI / EAS CLI — React Native builds
 - Better Auth — authentication setup
-- Drizzle ORM — database schema and migrations
-- Supabase — hosted Postgres + edge functions
-- Convex — reactive backend (alternative to Drizzle+Supabase where it fits)
+- Convex — reactive backend (primary DB choice)
+- Drizzle ORM — database schema and migrations (fallback)
+- Supabase — hosted Postgres + edge functions (fallback)
 - tRPC v11 — type-safe API layer
 - NativeWind / Tailwind — styling
 - Gradle / Android SDK Build Tools — native Android builds (for patching, not full rebuilds)
