@@ -72,7 +72,9 @@ pnpm turbo gen init
 
 **Key tech decisions:**
 - **Better Auth 1.4.0-beta.9** over NextAuth/Auth.js — native Expo support via `@better-auth/expo`, plugin ecosystem, OAuth proxy for preview deploys, Discord as default social provider. Auth schema generated via `pnpm --filter @acme/auth generate`
-- **Drizzle + Supabase** — type-safe Postgres with `drizzle-zod` for schema→validator generation, `drizzle-kit push` for migrations, Drizzle Studio for visual DB management
+- **Database — two options depending on the project:**
+  - **Drizzle + Supabase** — type-safe Postgres with `drizzle-zod` for schema→validator generation, `drizzle-kit push` for migrations, Drizzle Studio for visual DB management. Good for traditional relational data, edge-ready workloads.
+  - **Convex** — reactive backend-as-a-service with real-time sync, serverless functions, automatic caching. Use where real-time matters, or where the reactive model is a better fit than traditional request/response.
 - **tRPC v11** with `@trpc/tanstack-react-query` — end-to-end type-safe API
 - **React 19.1.4** across everything
 - **TanStack Query + TanStack Form** — data fetching and form management
@@ -90,14 +92,26 @@ pnpm turbo gen init
 - **pnpm** — workspace-aware dependency management
 - **Turborepo** — parallel builds, caching, task orchestration
 
-### Bonus Half (Strong Addition): UI Automation / Device Interaction
-The ability for the LLM to actually SEE and INTERACT with the device:
+### The Bridge: UI Automation / Device Interaction
+This isn't a bonus — it's what connects the two halves. The LLM can SEE and INTERACT with the device, which is how live analysis feeds into the build process:
 - `adb shell screencap` — capture screen
 - `adb shell uiautomator dump` — structured view hierarchy (XML)
 - `adb shell input tap/swipe/text` — touch, gesture, type
 - **scrcpy** — real-time screen mirroring
-- This enables autonomous app navigation, testing, and verification
-- Pairs with BOTH halves: drive UI to trigger hooked methods (RE), verify built apps work (dev)
+
+**The workflow this enables:** A user wants to modernize an app. The LLM runs it on the device, navigates it, hooks into methods as they're triggered by real UI interaction, captures screens/flows/data patterns — all while the app is live. That analysis directly informs what gets built on the development side. It's not just "analyze a static APK" — it's "use the app, understand it in motion, then build something better."
+
+### Native Android Build Tools (Gradle/SDK)
+T3 Turbo is for building NEW modern apps. But not everything needs a full-stack rebuild:
+- **Gradle** — compile, build, package existing native Android projects
+- **APK signing** — keystores, zipalign, apksigner
+- **AAPT2** — resource compilation, manifest processing
+- **D8/R8** — dex compilation, code shrinking/obfuscation
+- **Android SDK Build Tools** — full native compile pipeline
+
+**When to use which:**
+- **T3 Turbo** — building a new modern app from scratch (open-source replacement, new project inspired by analysis)
+- **Gradle/SDK** — patching an existing APK, modifying native code, or when only the RE half is in play without a full rebuild
 
 ## The Pipeline: Why Both Halves Together Matter
 
@@ -158,8 +172,10 @@ Cheese and tomato go on pizza, but also in spaghetti and lasagna. The underlying
 - Better Auth — authentication setup
 - Drizzle ORM — database schema and migrations
 - Supabase — hosted Postgres + edge functions
+- Convex — reactive backend (alternative to Drizzle+Supabase where it fits)
 - tRPC v11 — type-safe API layer
 - NativeWind / Tailwind — styling
+- Gradle / Android SDK Build Tools — native Android builds (for patching, not full rebuilds)
 
 ## Status
 - [ ] MCP server architecture designed
